@@ -40,35 +40,60 @@ async def lifespan(app: FastAPI):
     应用生命周期管理
     启动和关闭事件处理
     """
-    # 启动事件
+    logger = logging.getLogger(__name__)
     settings = get_settings()
     
     # 初始化数据库连接
     try:
+        logger.info("正在初始化数据库连接...")
         await init_db()
+        
+        # 测试数据库连接
+        from app.db.session import get_engine
+        engine = get_engine()
+        async with engine.connect() as conn:
+            await conn.execute("SELECT 1")
+        logger.info("✓ 数据库连接成功")
     except Exception as e:
+        logger.error(f"✗ 数据库连接失败: {str(e)}")
         raise
     
     # 初始化 Redis 连接
     try:
+        logger.info("正在初始化 Redis 连接...")
         await init_redis()
+        
+        # 测试 Redis 连接
+        from app.cache import get_redis_client
+        redis = get_redis_client()
+        await redis.ping()
+        logger.info("✓ Redis 连接成功")
     except Exception as e:
+        logger.error(f"✗ Redis 连接失败: {str(e)}")
         raise
+    
+    logger.info("🚀 应用启动完成")
     
     yield
     
     # 关闭事件
+    logger.info("正在关闭应用...")
+    
     # 关闭数据库连接
     try:
         await close_db()
+        logger.info("✓ 数据库连接已关闭")
     except Exception as e:
-        pass
+        logger.error(f"✗ 关闭数据库连接失败: {str(e)}")
     
     # 关闭 Redis 连接
     try:
         await close_redis()
+        logger.info("✓ Redis 连接已关闭")
     except Exception as e:
-        pass
+        logger.error(f"✗ 关闭 Redis 连接失败: {str(e)}")
+    
+    logger.info("👋 应用已关闭")
 
 
 # ==================== 创建 FastAPI 应用 ====================
