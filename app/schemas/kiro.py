@@ -69,13 +69,13 @@ class KiroBalanceInfo(BaseModel):
     reset_date: Optional[datetime] = Field(None, description="重置日期")
 
 
-class KiroRawData(BaseModel):
-    """Kiro原始数据"""
-    usage_limit: float = Field(..., description="使用限额")
-    current_usage: float = Field(..., description="当前使用量")
-    bonus_usage: float = Field(..., description="bonus使用量")
-    bonus_limit: float = Field(..., description="bonus限额")
-    bonus_available: float = Field(..., description="bonus可用余额")
+class KiroFreeTrial(BaseModel):
+    """Kiro免费试用信息"""
+    status: bool = Field(..., description="免费试用状态")
+    usage: float = Field(..., description="已使用量")
+    limit: float = Field(..., description="总限额")
+    available: float = Field(..., description="可用余额")
+    expiry: Optional[datetime] = Field(None, description="过期时间")
 
 
 class KiroAccountBalanceData(BaseModel):
@@ -84,8 +84,9 @@ class KiroAccountBalanceData(BaseModel):
     account_name: str = Field(..., description="账号名称")
     email: Optional[str] = Field(None, description="邮箱")
     subscription: Optional[str] = Field(None, description="订阅类型，如 KIRO PRO+")
+    subscription_type: Optional[str] = Field(None, description="订阅类型详情，如 Q_DEVELOPER_STANDALONE_PRO_PLUS")
     balance: KiroBalanceInfo = Field(..., description="余额详情")
-    raw_data: KiroRawData = Field(..., description="原始数据")
+    free_trial: Optional[KiroFreeTrial] = Field(None, description="免费试用信息")
     bonus_details: List[KiroBonusDetail] = Field(default_factory=list, description="bonus详情列表")
 
 
