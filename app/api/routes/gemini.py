@@ -6,7 +6,7 @@ Gemini兼容的API端点
 from typing import Optional
 import logging
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -79,13 +79,14 @@ async def generate_content(
         )
 
 @router.post(
-    "/models/{model}:streamGenerateContent?alt=sse",
-    summary="图片生成",
-    description="使用Gemini模型生成图片，支持文生图和图生图。支持JWT token或API key认证。响应使用SSE格式（心跳保活）"
+    "/models/{model}:streamGenerateContent",
+    summary="图片生成（流式）",
+    description="使用Gemini模型生成图片，支持文生图和图生图。支持JWT token或API key认证。响应使用SSE格式（心跳保活）。使用 ?alt=sse 查询参数启用SSE流式响应。"
 )
 async def stream_generate_content(
     model: str,
     request: GenerateContentRequest,
+    alt: str = Query(default="sse", description="响应格式，默认为sse"),
     current_user: User = Depends(get_user_flexible),
     service: PluginAPIService = Depends(get_plugin_api_service)
 ):
